@@ -17,14 +17,14 @@ class SQLCompiler(compiler.SQLCompiler):
             values.append(self.query.convert_values(value, field, connection=self.connection))
         return row[:index_extra_select] + tuple(values)
 
-    def as_sql(self):
-        result, params = super(SQLCompiler, self).as_sql()
+    def as_sql(self, *args, **kwargs):
+        result, params = super(SQLCompiler, self).as_sql(*args, **kwargs)
         update_params = self.connection.ops.modify_params(params)
         return result, update_params
 
 
 class SQLInsertCompiler(compiler.SQLInsertCompiler, SQLCompiler):
-    def as_sql(self):
+    def as_sql(self, *args, **kwargs):
         qn = self.connection.ops.quote_name
         opts = self.query.model._meta
         result = ['INSERT INTO %s' % qn(opts.db_table)]
@@ -113,8 +113,8 @@ class SQLDeleteCompiler(compiler.SQLDeleteCompiler, SQLCompiler):
 
 
 class SQLUpdateCompiler(compiler.SQLUpdateCompiler, SQLCompiler):
-    def as_sql(self):
-        result, params = super(SQLUpdateCompiler, self).as_sql()
+    def as_sql(self, *args, **kwargs):
+        result, params = super(SQLUpdateCompiler, self).as_sql(*args, **kwargs)
         update_params = self.connection.ops.modify_update_params(params)
         return result, update_params
 
