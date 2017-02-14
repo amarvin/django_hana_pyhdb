@@ -91,8 +91,12 @@ class CursorWrapper(object):
         except Database.Error as e:
             # Map some error codes to IntegrityError, since they seem to be
             # misclassified and Django would prefer the more logical place.
-            if e[0] in self.codes_for_integrityerror:
-                six.reraise(utils.IntegrityError, utils.IntegrityError(*tuple(e.args)), sys.exc_info()[2])
+            try:
+                if e[0] in self.codes_for_integrityerror:
+                    six.reraise(utils.IntegrityError, utils.IntegrityError(*tuple(e.args)), sys.exc_info()[2])
+            except TypeError:
+                if e in self.codes_for_integrityerror:
+                    six.reraise(utils.IntegrityError, utils.IntegrityError(*tuple(e.args)), sys.exc_info()[2])
             six.reraise(utils.DatabaseError, utils.DatabaseError(*tuple(e.args)), sys.exc_info()[2])
 
     def executemany(self, sql, param_list):
@@ -103,8 +107,12 @@ class CursorWrapper(object):
         except Database.Error as e:
             # Map some error codes to IntegrityError, since they seem to be
             # misclassified and Django would prefer the more logical place.
-            if e[0] in self.codes_for_integrityerror:
-                six.reraise(utils.IntegrityError, utils.IntegrityError(*tuple(e.args)), sys.exc_info()[2])
+            try:
+                if e[0] in self.codes_for_integrityerror:
+                    six.reraise(utils.IntegrityError, utils.IntegrityError(*tuple(e.args)), sys.exc_info()[2])
+            except TypeError:
+                if e in self.codes_for_integrityerror:
+                    six.reraise(utils.IntegrityError, utils.IntegrityError(*tuple(e.args)), sys.exc_info()[2])
             six.reraise(utils.DatabaseError, utils.DatabaseError(*tuple(e.args)), sys.exc_info()[2])
 
     def _replace_params(self, sql):
