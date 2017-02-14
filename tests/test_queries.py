@@ -14,11 +14,6 @@ class DatabaseSQLMixin(object):
 
     def assertQueryEqual(self, query1, query2):
         self.assertEqual(self.remove_whitespace(query1), self.remove_whitespace(query2))
-    
-    def assertQueryAndParamsEqual(self, query1, params1, query2, params2):
-        query1 = self.remove_whitespace(query1)
-        query2 = self.remove_whitespace(query2)
-        self.assertEqual([query1, params2], [query2, params2])
 
 
 class TestCreation(DatabaseSQLMixin, unittest.TestCase):
@@ -61,15 +56,21 @@ class TestCreation(DatabaseSQLMixin, unittest.TestCase):
         self.assertEqual(mock_execute.call_args_list, expected_statements)
 
 class TestWrite(DatabaseSQLMixin, unittest.TestCase):
+    style = no_style()
     
-    def test_insert_into(self):
-        expected_query = (
-            'INSERT INTO "TEST_DHP_TESTMODEL" (id, "FIELD") '
-            'VALUES (test_dhp_testmodel_id_seq.nextval, %s)'
+    @mock.patch.object(BaseDatabaseSchemaEditor, 'execute')
+    def test_insert_into(self, mock_execute):
+        expected_statement = (
+            (
+                ('INSERT INTO "TEST_DHP_TESTMODEL" (id, "FIELD") '
+                 'VALUES (test_dhp_testmodel_id_seq.nextval, %s)'),
+            ('field1')),
+            ['field1'],
         )
-        expected_params = ('field1')
-        qs = TestModel(field='field1')
-        self.assertQueryEqual(qs.query, qs.params, expected_query, expected_params)
+        queryset = TestModel(field='field1')
+        queryset.save()
+        self.assertEqual(mock_execute.call_args_list, expected_statement)
+        
 
 class TestSelection(DatabaseSQLMixin, unittest.TestCase):
 
