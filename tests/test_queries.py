@@ -58,7 +58,7 @@ class TestCreation(DatabaseSQLMixin, unittest.TestCase):
 class TestWrite(DatabaseSQLMixin, unittest.TestCase):
     style = no_style()
     
-    @mock.patch.object(BaseDatabaseSchemaEditor, 'execute')
+    @mock.patch.object(TestModel, 'save')
     def test_insert_into(self, mock_execute):
         expected_statement = (
             (
