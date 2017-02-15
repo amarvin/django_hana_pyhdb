@@ -6,6 +6,7 @@ from django.contrib.gis.db.backends.utils import SpatialOperator
 from django.contrib.gis.geometry.backend import Geometry
 from django.contrib.gis.measure import Distance
 from django.db.backends.base.operations import BaseDatabaseOperations
+from django.utils.encoding import force_text
 from django.utils import six
 
 
@@ -211,11 +212,14 @@ class DatabaseOperations(BaseDatabaseOperations, BaseSpatialOperations):
 
     def convert_values(self, value, field):
         """
-        Type conversion for boolean field. Keping values as 0/1 confuses
-        the modelforms.
+        Type conversion for fields
         """
         if (field and field.get_internal_type() in ('BooleanField', 'NullBooleanField') and value in (0, 1)):
+            # Keep values as 0/1 confuses the modelforms.
             value = bool(value)
+        elif (field and field.get_internal_type() in ('TextField')):
+            # Convert from LOB (or CLOB, NCLOB) to string
+            value = force_text(value.read())
         return value
 
     def modify_insert_params(self, placeholder, params):
